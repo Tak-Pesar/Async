@@ -9,7 +9,7 @@
         "asynchronous",
         "swoole",
         "swoole-php",
-        "php",
+        "php"
     ],
     "autoload": {
         "psr-4": {
