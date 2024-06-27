@@ -14,7 +14,10 @@
     "autoload": {
         "psr-4": {
             "Tak\\Async\\": "src"
-        }
+        },
+        "files": [
+            "src/functions.php"
+        ]
     },
     "authors": [
         {
@@ -22,6 +25,9 @@
             "email": "loser.man.2007@gmail.com"
         }
     ],
+    "support": {
+        "issues": "https://github.com/Tak-Pesar/Async/issues"
+    },
     "minimum-stability": "stable",
     "require": {
         "php": "^8.0",
