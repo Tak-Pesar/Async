@@ -28,7 +28,7 @@
     "support": {
         "issues": "https://github.com/Tak-Pesar/Async/issues"
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "beta",
     "require": {
         "php": ">=8.1",
         "ext-swoole": "^5.0"
