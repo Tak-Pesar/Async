@@ -1,0 +1,30 @@
+{
+    "name": "takpesar/async",
+    "license": "MIT",
+    "description": "Discover async tools for easier use of Swoole extensions , offering more features for efficient and high-performance applications . This library makes async programming very good and straightforward",
+    "type": "library",
+    "keywords": [
+        "async",
+        "tools",
+        "asynchronous",
+        "swoole",
+        "swoole-php",
+        "php",
+    ],
+    "autoload": {
+        "psr-4": {
+            "Tak\\Async\\": "src"
+        }
+    },
+    "authors": [
+        {
+            "name": "Tak Pesar",
+            "email": "loser.man.2007@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "php": "^8.0",
+        "ext-swoole": "^5.0"
+    }
+}
