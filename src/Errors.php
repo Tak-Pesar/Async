@@ -10,7 +10,7 @@ use Exception;
 
 use Closure;
 
-class Errors extends Exception {
+final class Errors extends Exception {
 	private readonly array $exceptions;
 	static private Closure $handler;
 
@@ -22,13 +22,29 @@ class Errors extends Exception {
 			parent::__construct('Multiple exceptions occurred !',...$args);
 			$this->exceptions = $exceptions;
 		endif;
-		if(isset(self::$handler)) Coroutine::create(self::$handler,...$this->exceptions);
 	}
 	public function getExceptions() : array {
 		return $this->exceptions;
 	}
-	static public function setErrorHandler(callable $callback) : void {
-		self::$handler = Closure::fromCallable($callback);
+	public function throw() : void {
+		if(isset(self::$handler)):
+			foreach($this->exceptions as $exception):
+				if(Tools::inCoroutine()):
+					Coroutine::create(self::$handler,$exception);
+				else:
+					call_user_func(self::$handler,$exception);
+				endif;
+			endforeach;
+		else:
+			throw $this;
+		endif;
+	}
+	static public function setErrorHandler(callable $callback = null) : void {
+		if(is_null($callback)):
+			unset(self::$handler);
+		else:
+			self::$handler = Closure::fromCallable($callback);
+		endif;
 	}
 }
 

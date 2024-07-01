@@ -21,7 +21,7 @@ final class Future {
 			if(isset($this->catch)):
 				Coroutine::create($this->catch,$result);
 			elseif($this->ignore === false):
-				throw $result;
+				$result->throw();
 			endif;
 			return null;
 		endif;

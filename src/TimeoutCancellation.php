@@ -6,13 +6,23 @@ namespace Tak\Async;
 
 use Swoole\Timer;
 
-class TimeoutCancellation extends Cancellation {
+final class TimeoutCancellation extends Cancellation {
+	private int $timer;
+
 	public function __construct(private float $timeout,public string $message = 'Time out !'){
-		$this->setStatus(true);
 	}
-	public function setProcesses(array $processes) : void {
-		$this->processes = $processes;
-		Timer::after(intval($this->timeout * 1000),$this->cancel(...));
+	public function setStatus(bool $status) : void {
+		$this->status = $status;
+		if($status):
+			if(isset($this->timer)):
+				$exception = new Errors('The cancellation has already been used !');
+				$exception->throw();
+			else:
+				$this->timer = Timer::after(intval($this->timeout * 1000),$this->cancel(...));
+			endif;
+		else:
+			Timer::clear($this->timer);
+		endif;
 	}
 }
 

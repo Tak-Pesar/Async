@@ -4,18 +4,15 @@ declare(strict_types = 1);
 
 namespace Tak;
 
-use Swoole\Coroutine:
-
-function async(callable $callback,mixed ...$args) : Run {
-	$run = new Run;
-	return $run->async($callback,...$args);
+function async(callable $callback,mixed ...$args) : Task {
+	return (new Task)->async($callback,...$args);
 }
 
 function delay(float $seconds) : bool {
-	return Coroutine::sleep($seconds);
+	return (new Task)->sleep($seconds);
 }
 
-function setErrorHandler(callable $callback) : void {
+function setErrorHandler(callable $callback = null) : void {
 	Errors::setErrorHandler($callback);
 }
 
