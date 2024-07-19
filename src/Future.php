@@ -10,13 +10,14 @@ use Closure;
 
 final class Future {
 	protected Closure $catch;
-	public Closure $finally;
+	protected Closure $finally;
 	private bool $ignore = false;
 
 	public function __construct(private DeferredFuture $deferred){
 	}
 	public function await(float $timeout = -1) : mixed {
 		$result = $this->deferred->await($timeout);
+		if(isset($this->finally)) Coroutine::defer($this->finally);
 		if($result instanceof Errors):
 			if(isset($this->catch)):
 				Coroutine::create($this->catch,$result);

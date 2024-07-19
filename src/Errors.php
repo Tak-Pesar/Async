@@ -6,6 +6,8 @@ namespace Tak\Async;
 
 use Swoole\Coroutine;
 
+use Throwable;
+
 use Exception;
 
 use Closure;
@@ -14,13 +16,16 @@ final class Errors extends Exception {
 	private readonly array $exceptions;
 	static private Closure $handler;
 
-	public function __construct(string | array $exceptions,mixed ...$args){
+	public function __construct(string | array | Throwable $exceptions,mixed ...$args){
 		if(is_string($exceptions)):
 			parent::__construct($exceptions,...$args);
 			$this->exceptions = array($this);
-		else:
+		elseif(is_array($exceptions)):
 			parent::__construct('Multiple exceptions occurred !',...$args);
 			$this->exceptions = $exceptions;
+		else:
+			parent::__construct($exceptions->getMessage(),$exceptions->getCode(),...$args);
+			$this->exceptions = array($exceptions);
 		endif;
 	}
 	public function getExceptions() : array {
@@ -45,6 +50,9 @@ final class Errors extends Exception {
 		else:
 			self::$handler = Closure::fromCallable($callback);
 		endif;
+	}
+	public function __toString() : string {
+		return implode(PHP_EOL,$this->exceptions);
 	}
 }
 

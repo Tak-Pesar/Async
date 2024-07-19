@@ -8,9 +8,9 @@ use Swoole\Coroutine;
 
 use Swoole\Coroutine\Channel;
 
-use Closure;
+use Throwable;
 
-use RuntimeException;
+use Closure;
 
 final class DeferredFuture {
 	protected Channel $channel;
@@ -22,13 +22,16 @@ final class DeferredFuture {
 		$this->future = new Future($this);
 	}
 	public function complete(mixed $result) : void {
-		if($this->isCompleted) throw new RuntimeException('Future is already completed !');
-		$this->isCompleted = true;
-		$this->channel->push($result);
-		if(isset($this->future->finally)) Coroutine::create($this->future->finally);
+		if($this->isCompleted):
+			$exception = new Errors('Future is already completed !');
+			$exception->throw();
+		else:
+			$this->isCompleted = true;
+			$this->channel->push($result);
+		endif;
 	}
-	public function error(...$arguments) : void {
-		$this->complete(new Errors(...$arguments));
+	public function error(Throwable $exception) : void {
+		$this->complete(new Errors($exception));
 	}
 	public function getFuture() : Future {
 		return $this->future;
@@ -40,6 +43,8 @@ final class DeferredFuture {
 		$result = $this->channel->pop($timeout);
 		if($this->channel->errCode === SWOOLE_CHANNEL_TIMEOUT):
 			$result = new Errors('Timeout waiting for result !');
+		elseif($this->channel->errCode === SWOOLE_CHANNEL_CLOSED):
+			$result = new Errors('The channel is closed !');
 		endif;
 		return $result;
 	}

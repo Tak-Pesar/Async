@@ -76,20 +76,6 @@ final class Task {
 		else:
 			run($join);
 		endif;
-		if(empty($this->errors) === false):
-			if(isset($this->catch)):
-				foreach($this->errors as $pid => $error):
-					if(Tools::inCoroutine()):
-						Coroutine::create($this->catch,$error,$pid);
-					else:
-						call_user_func($this->catch,$error,$pid);
-					endif;
-				endforeach;
-			elseif($this->ignore === false):
-				$exception = new Errors($this->errors);
-				$exception->throw();
-			endif;
-		endif;
 		if(isset($this->finally)):
 			if(Tools::inCoroutine()):
 				Coroutine::defer($this->finally);
@@ -97,10 +83,24 @@ final class Task {
 				call_user_func($this->finally);
 			endif;
 		endif;
+		if(empty($this->errors) === false):
+			if(isset($this->catch)):
+				foreach($this->errors as $cid => $error):
+					if(Tools::inCoroutine()):
+						Coroutine::create($this->catch,$error,$cid);
+					else:
+						call_user_func($this->catch,$error,$cid);
+					endif;
+				endforeach;
+			elseif($this->ignore === false):
+				$exception = new Errors(count($this->cids) < 2 ? current($this->errors) : $this->errors);
+				$exception->throw();
+			endif;
+		endif;
 		return count($this->cids) < 2 ? current($this->results) : $this->results;
 	}
 	public function sleep(float $seconds) : bool {
-		return Coroutine::sleep($seconds);
+		return Tools::inCoroutine() ? Coroutine::sleep($seconds) : (usleep(intval($seconds * 1e6)) || true);
 	}
 	public function cancel() : bool {
 		$canceled = array_map(fn(int $cid) : bool => Coroutine::cancel($cid),$this->cids);
